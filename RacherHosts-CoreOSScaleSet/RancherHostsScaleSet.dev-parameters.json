@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmssName": {
+      "value": "c2sdevho"
+    },
+    "instanceCount": {
+      "value": 3
+    },
+    "adminUsername": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/d29bb595-46d1-4c56-82c4-9f2e0062c2da/resourceGroups/c2s-common/providers/Microsoft.KeyVault/vaults/c2s-vault"
+        },
+        "secretName": "c2s-dev-adminuser"
+      }
+    },
+    "vmSize": {
+      "value": "Standard_DS2_v2"
+    },
+    "rancherEnvironment": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/d29bb595-46d1-4c56-82c4-9f2e0062c2da/resourceGroups/c2s-common/providers/Microsoft.KeyVault/vaults/c2s-vault"
+        },
+        "secretName": "rancher-c2s-dev-environment"
+      }
+    },
+    "rancherServerUrl": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/d29bb595-46d1-4c56-82c4-9f2e0062c2da/resourceGroups/c2s-common/providers/Microsoft.KeyVault/vaults/c2s-vault"
+        },
+        "secretName": "rancher-c2s-dev-serverurl"
+      }
+    },
+    "rancherRegistrationToken": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/d29bb595-46d1-4c56-82c4-9f2e0062c2da/resourceGroups/c2s-common/providers/Microsoft.KeyVault/vaults/c2s-vault"
+        },
+        "secretName": "rancher-c2s-dev-token"
+      }
+    },
+    "adminPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/d29bb595-46d1-4c56-82c4-9f2e0062c2da/resourceGroups/c2s-common/providers/Microsoft.KeyVault/vaults/c2s-vault"
+        },
+        "secretName": "c2s-dev-adminpass"
+      }
+    },
+    "rancherHostLabels": {
+      "value": "platform=azure&project=c2s&environment=dev"
+    }
+  }
+}
