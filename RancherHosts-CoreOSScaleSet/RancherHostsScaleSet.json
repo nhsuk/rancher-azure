@@ -364,7 +364,7 @@
                     "fileUris": [
                       "https://raw.githubusercontent.com/adamgraves-choices/rancher-azure/master/CustomScripts/ConfigureRancherHost.sh"
                     ],
-                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherEnvironment'),' ',parameters('rancherRegistrationToken'),' ',parameters('rancherHostLabels'))]"
+                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherRegistrationToken'))]"
                   }
                 }
               }
