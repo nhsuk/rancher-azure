@@ -28,15 +28,7 @@
       "type": "string",
       "minLength": 1
     },
-    "rancherEnvironment": {
-      "type": "string",
-      "minLength": 1
-    },
     "rancherRegistrationToken": {
-      "type": "string",
-      "minLength": 1
-    },
-    "rancherHostLabels": {
       "type": "string",
       "minLength": 1
     },
