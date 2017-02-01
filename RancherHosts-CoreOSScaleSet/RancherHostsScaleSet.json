@@ -75,7 +75,7 @@
       "publisher": "CoreOS",
       "offer": "CoreOS",
       "sku": "Stable",
-      "version": "latest"
+      "version": "1235.6.0"
     },
     "imageReference": "[variables('osType')]"
   },
