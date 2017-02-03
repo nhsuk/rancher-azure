@@ -27,14 +27,6 @@
     "vmSize": {
       "value": "Standard_DS1_v2"
     },
-    "rancherEnvironment": {
-      "reference": {
-        "keyVault": {
-          "id": "/subscriptions/d29bb595-46d1-4c56-82c4-9f2e0062c2da/resourceGroups/c2s-common/providers/Microsoft.KeyVault/vaults/c2s-dev-vault"
-        },
-        "secretName": "rancher-environment"
-      }
-    },
     "rancherServerUrl": {
       "reference": {
         "keyVault": {
@@ -50,9 +42,6 @@
         },
         "secretName": "rancher-regtoken"
       }
-    },
-    "rancherHostLabels": {
-      "value": "platform=azure&project=c2s&environment=dev"
     }
   }
 }

@@ -1,0 +1,541 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminPassword": {
+            "defaultValue": null,
+            "type": "SecureString"
+        },
+        "availabilitySet_name": {
+            "defaultValue": "rancher_server_prod",
+            "type": "String"
+        },
+        "vm_chprch01_name": {
+            "defaultValue": "ch-p-rch01",
+            "type": "String"
+        },
+        "vm_chprch02_name": {
+            "defaultValue": "ch-p-rch02",
+            "type": "String"
+        },
+        "dnsNameLabel": {
+            "defaultValue": "nhsuk-rancher",
+            "type": "String"
+        },
+        "loadBalancers_rancher_lb_name": {
+            "defaultValue": "rancher-lb",
+            "type": "String"
+        },
+        "nic_name_chprch01": {
+            "defaultValue": "ch-p-rch01-nic",
+            "type": "String"
+        },
+        "nic_name_chprch02": {
+            "defaultValue": "ch-p-rch02-nic",
+            "type": "String"
+        },
+        "nsg_rancher_server_name": {
+            "defaultValue": "rancher_server-nsg",
+            "type": "String"
+        },
+        "publicIPAddresses_rancher_ip_name": {
+            "defaultValue": "rancher_ip",
+            "type": "String"
+        },
+        "virtualNetworks_RancherServer_vnet_name": {
+            "defaultValue": "RancherServer-vnet",
+            "type": "String"
+        },
+        "storageAccount_name": {
+            "defaultValue": "chrancherserver",
+            "type": "String"
+        },
+        "loadBalancers_rancher_lb_id": {
+            "defaultValue": "/subscriptions/1e543650-5458-44ea-a3b1-35a6d0d92cc9/resourceGroups/RancherServer/providers/Microsoft.Network/loadBalancers/rancher-lb/frontendIPConfigurations/LoadBalancerFrontEnd",
+            "type": "String"
+        },
+        "loadBalancers_rancher_lb_id_1": {
+            "defaultValue": "/subscriptions/1e543650-5458-44ea-a3b1-35a6d0d92cc9/resourceGroups/RancherServer/providers/Microsoft.Network/loadBalancers/rancher-lb/backendAddressPools/rancher",
+            "type": "String"
+        },
+        "loadBalancers_rancher_lb_id_2": {
+            "defaultValue": "/subscriptions/1e543650-5458-44ea-a3b1-35a6d0d92cc9/resourceGroups/RancherServer/providers/Microsoft.Network/loadBalancers/rancher-lb/probes/rancher_http",
+            "type": "String"
+        },
+        "loadBalancers_rancher_lb_id_3": {
+            "defaultValue": "/subscriptions/1e543650-5458-44ea-a3b1-35a6d0d92cc9/resourceGroups/RancherServer/providers/Microsoft.Network/loadBalancers/rancher-lb/frontendIPConfigurations/LoadBalancerFrontEnd",
+            "type": "String"
+        },
+        "loadBalancers_rancher_lb_id_4": {
+            "defaultValue": "/subscriptions/1e543650-5458-44ea-a3b1-35a6d0d92cc9/resourceGroups/RancherServer/providers/Microsoft.Network/loadBalancers/rancher-lb/backendAddressPools/rancher",
+            "type": "String"
+        },
+        "loadBalancers_rancher_lb_id_5": {
+            "defaultValue": "/subscriptions/1e543650-5458-44ea-a3b1-35a6d0d92cc9/resourceGroups/RancherServer/providers/Microsoft.Network/loadBalancers/rancher-lb/probes/rancher_server",
+            "type": "String"
+        },
+        "loadBalancers_rancher_lb_id_6": {
+            "defaultValue": "/subscriptions/1e543650-5458-44ea-a3b1-35a6d0d92cc9/resourceGroups/RancherServer/providers/Microsoft.Network/loadBalancers/rancher-lb/frontendIPConfigurations/LoadBalancerFrontEnd",
+            "type": "String"
+        },
+        "loadBalancers_rancher_lb_id_7": {
+            "defaultValue": "/subscriptions/1e543650-5458-44ea-a3b1-35a6d0d92cc9/resourceGroups/RancherServer/providers/Microsoft.Network/loadBalancers/rancher-lb/frontendIPConfigurations/LoadBalancerFrontEnd",
+            "type": "String"
+        }
+    },
+    "variables": {
+      "location": "uksouth",
+      "vmSize": "Standard_DS1_v2"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[parameters('availabilitySet_name')]",
+            "apiVersion": "2015-06-15",
+            "location": "[variables('location')]",
+            "properties": {
+                "platformUpdateDomainCount": 5,
+                "platformFaultDomainCount": 3
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('vm_chprch01_name')]",
+            "apiVersion": "2015-06-15",
+            "location": "[variables('location')]",
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySet_name'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04.0-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[parameters('vm_chprch01_name')]",
+                        "createOption": "FromImage",
+                        "vhd": {
+                            "uri": "[concat('https', '://', parameters('storageAccount_name'), '.blob.core.windows.net', concat('/vhds/', parameters('vm_chprch01_name'),'-os.vhd'))]"
+                        },
+                        "caching": "ReadWrite"
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vm_chprch01_name')]",
+                    "adminUsername": "ansible",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "/home/ansible/.ssh/authorized_keys",
+                                    "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDZZR3NmNARVkBxELj27vdhOd0pH9FOFE2CfwaZFuUATOQSb1Jr56jaaTqxNdSFsdQjGnkVxv3cSe28mainuezibs4JIiMw5x+Oq8m6wJ7Wz7D57TKsXJp/cpvcEQP26zSuZwf07DJEazDIwCEkLa1qkDFmE36EkbQu03OHzHS7QOJRjPNTxAGYFCwfTyA4vK3ag6gTqhdEO2Ya+acUbIl4TR6jfvXaOGbujCv7YC0NwNyVSkdxBvLIw4ptwlPk+xi934Fs7cT4fffI5hPLcy44iHabH+SBONJqxi8OFKuGn0dnppd5u8De0RyCj6hXw4N4c8yiYxcXmlDQNQ3DwUTl7Kg3h8u2sKP0q2BoQV8Ow9kwuVm7mVLt+7/w23IsRDj1Icgt69FO27p/fufsx1ci+/Nhqz2qEzOyKDB32Qn3wBk3rHe/BQ+SuCcD/aLgmanBj5/0xM7I1AUbVsGLX3hkD3pW3W8uscFTceuwafoxoqGbqhOSgGYrri7PMgsfUXMvcw9MwUMi4ig4NX8UQ1FCFBYtZhCTT+I926o64ZT/E4o8es6fLwbT+n2w6AypFebSFseemm+RNmlY0aT64DI4g0dOE/fZj96WCj8iDemsEggU8z/sxa4C22djKke+8BthrkPr5a4P0wnDsnuVlFFvwxGPkFGH3fd9abE8ksjCBQ=="
+                                }
+                            ]
+                        }
+                    },
+                    "secrets": [],
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nic_name_chprch01'))]"
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySet_name'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_name'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('nic_name_chprch01'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('vm_chprch02_name')]",
+            "apiVersion": "2015-06-15",
+            "location": "[variables('location')]",
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySet_name'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04.0-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[parameters('vm_chprch02_name')]",
+                        "createOption": "FromImage",
+                        "vhd": {
+                            "uri": "[concat('https', '://', parameters('storageAccount_name'), '.blob.core.windows.net', concat('/vhds/', parameters('vm_chprch02_name'),'-os.vhd'))]"
+                        },
+                        "caching": "ReadWrite"
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vm_chprch02_name')]",
+                    "adminUsername": "ansible",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "/home/ansible/.ssh/authorized_keys",
+                                    "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDZZR3NmNARVkBxELj27vdhOd0pH9FOFE2CfwaZFuUATOQSb1Jr56jaaTqxNdSFsdQjGnkVxv3cSe28mainuezibs4JIiMw5x+Oq8m6wJ7Wz7D57TKsXJp/cpvcEQP26zSuZwf07DJEazDIwCEkLa1qkDFmE36EkbQu03OHzHS7QOJRjPNTxAGYFCwfTyA4vK3ag6gTqhdEO2Ya+acUbIl4TR6jfvXaOGbujCv7YC0NwNyVSkdxBvLIw4ptwlPk+xi934Fs7cT4fffI5hPLcy44iHabH+SBONJqxi8OFKuGn0dnppd5u8De0RyCj6hXw4N4c8yiYxcXmlDQNQ3DwUTl7Kg3h8u2sKP0q2BoQV8Ow9kwuVm7mVLt+7/w23IsRDj1Icgt69FO27p/fufsx1ci+/Nhqz2qEzOyKDB32Qn3wBk3rHe/BQ+SuCcD/aLgmanBj5/0xM7I1AUbVsGLX3hkD3pW3W8uscFTceuwafoxoqGbqhOSgGYrri7PMgsfUXMvcw9MwUMi4ig4NX8UQ1FCFBYtZhCTT+I926o64ZT/E4o8es6fLwbT+n2w6AypFebSFseemm+RNmlY0aT64DI4g0dOE/fZj96WCj8iDemsEggU8z/sxa4C22djKke+8BthrkPr5a4P0wnDsnuVlFFvwxGPkFGH3fd9abE8ksjCBQ=="
+                                }
+                            ]
+                        }
+                    },
+                    "secrets": [],
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nic_name_chprch02'))]"
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySet_name'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccount_name'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('nic_name_chprch02'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "name": "[parameters('loadBalancers_rancher_lb_name')]",
+            "apiVersion": "2016-03-30",
+            "location": "[variables('location')]",
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "LoadBalancerFrontEnd",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_rancher_ip_name'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "rancher"
+                    },
+                    {
+                        "name": "new_backend_pool"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "http",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('loadBalancers_rancher_lb_id')]"
+                            },
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "loadDistribution": "Default",
+                            "backendAddressPool": {
+                                "id": "[parameters('loadBalancers_rancher_lb_id_1')]"
+                            },
+                            "probe": {
+                                "id": "[parameters('loadBalancers_rancher_lb_id_2')]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "https",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('loadBalancers_rancher_lb_id_3')]"
+                            },
+                            "frontendPort": 443,
+                            "backendPort": 443,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "loadDistribution": "Default",
+                            "backendAddressPool": {
+                                "id": "[parameters('loadBalancers_rancher_lb_id_4')]"
+                            },
+                            "probe": {
+                                "id": "[parameters('loadBalancers_rancher_lb_id_5')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "rancher_server",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 443,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2
+                        }
+                    },
+                    {
+                        "name": "rancher_http",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 80,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2
+                        }
+                    }
+                ],
+                "inboundNatRules": [
+                    {
+                        "name": "ch-p-rch02_ssh",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('loadBalancers_rancher_lb_id_6')]"
+                            },
+                            "frontendPort": 40222,
+                            "backendPort": 22,
+                            "protocol": "Tcp"
+                        }
+                    },
+                    {
+                        "name": "ch-p-rch01_ssh",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('loadBalancers_rancher_lb_id_7')]"
+                            },
+                            "frontendPort": 40221,
+                            "backendPort": 22,
+                            "protocol": "Tcp"
+                        }
+                    }
+                ],
+                "outboundNatRules": [],
+                "inboundNatPools": []
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_rancher_ip_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[parameters('nic_name_chprch01')]",
+            "apiVersion": "2016-03-30",
+            "location": "[variables('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "172.26.79.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_RancherServer_vnet_name')), '/subnets/default')]"
+                            },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_rancher_lb_name')), '/backendAddressPools/rancher')]"
+                                }
+                            ],
+                            "loadBalancerInboundNatRules": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_rancher_lb_name')), '/inboundNatRules/ch-p-rch01_ssh')]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_rancher_server_name'))]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_RancherServer_vnet_name'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_rancher_lb_name'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_rancher_server_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[parameters('nic_name_chprch02')]",
+            "apiVersion": "2016-03-30",
+            "location": "[variables('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "172.26.79.5",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_RancherServer_vnet_name')), '/subnets/default')]"
+                            },
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_rancher_lb_name')), '/backendAddressPools/rancher')]"
+                                }
+                            ],
+                            "loadBalancerInboundNatRules": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_rancher_lb_name')), '/inboundNatRules/ch-p-rch02_ssh')]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_rancher_server_name'))]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_RancherServer_vnet_name'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_rancher_lb_name'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_rancher_server_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[parameters('nsg_rancher_server_name')]",
+            "apiVersion": "2016-03-30",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "rancher_server",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8080",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1010,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "http",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1020,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "https",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1030,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[parameters('publicIPAddresses_rancherx_ip_name')]",
+            "apiVersion": "2016-03-30",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[parameters('publicIPAddresses_rancher_ip_name')]",
+            "apiVersion": "2016-03-30",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('dnsNameLabel')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('virtualNetworks_RancherServer_vnet_name')]",
+            "apiVersion": "2016-03-30",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "172.26.79.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "172.26.79.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
+            },
+            "kind": "Storage",
+            "name": "[parameters('storageAccount_name')]",
+            "apiVersion": "2016-01-01",
+            "location": "[variables('location')]"
+        }
+    ]
+}
