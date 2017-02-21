@@ -3,7 +3,7 @@ export HOST_IP=$(ip addr show eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*'
 
 export RANCHER_SERVER_URL=$1
 export RANCHER_TOKEN=$2
-export RANCHER_AGENT_DOCKER_IMAGE='rancher/agent:v1.1.3'
+export RANCHER_AGENT_DOCKER_IMAGE='rancher/agent:v1.2.0'
 
 # INSTALL DOCKER
 curl https://releases.rancher.com/install-docker/1.12.sh | sh
