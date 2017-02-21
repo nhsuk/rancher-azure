@@ -5,7 +5,6 @@ export RANCHER_SERVER_URL=$1
 export RANCHER_TOKEN=$2
 export RANCHER_AGENT_DOCKER_IMAGE='rancher/agent:v1.1.3'
 
-sudo docker run -e CATTLE_HOST_LABELS=${CATTLE_HOST_LABELS} -d --privileged -v /var/run/docker.sock:/var/run/docker.sock
 sudo docker run -d --privileged \
                 -e CATTLE_AGENT_IP=${HOST_IP} \
                 -v /var/run/docker.sock:/var/run/docker.sock \
