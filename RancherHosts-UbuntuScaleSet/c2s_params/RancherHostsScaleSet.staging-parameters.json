@@ -44,7 +44,7 @@
       }
     },
     "rancherHostLabels": {
-      "value": "platform=azure&project=c2s&environment=staging"
+      "value": "platform=azure\\&project=c2s\\&environment=staging"
     }
   }
 }

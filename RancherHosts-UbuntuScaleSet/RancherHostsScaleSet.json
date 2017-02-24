@@ -35,7 +35,7 @@
     },
     "rancherHostLabels": {
       "type": "string",
-      "defaultValue": "platform=azure&env=test",
+      "defaultValue": "platform=azure\\&env=test",
       "minLength": 1
     },
     "adminUsername": {

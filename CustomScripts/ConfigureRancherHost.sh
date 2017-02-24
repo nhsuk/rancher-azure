@@ -14,7 +14,7 @@ sleep 5
 # RUN RANCHER SERVER
 sudo docker run -d --privileged \
                 -e CATTLE_AGENT_IP=${HOST_IP} \
-                -e CATTLE_HOST_LABELS="'${RANCHER_LABELS}'" \
+                -e CATTLE_HOST_LABELS="${RANCHER_LABELS}" \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v /var/lib/rancher:/var/lib/rancher \
                 ${RANCHER_AGENT_DOCKER_IMAGE} \
