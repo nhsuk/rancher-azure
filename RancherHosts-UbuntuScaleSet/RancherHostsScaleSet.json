@@ -26,6 +26,7 @@
     },
     "rancherServerUrl": {
       "type": "string",
+      "defaultValue": "https://rancher.nhschoices.net",
       "minLength": 1
     },
     "rancherRegistrationToken": {
@@ -34,6 +35,7 @@
     },
     "adminUsername": {
       "type": "string",
+      "defaultValue": "rancheradmin",
       "minLength": 1,
       "metadata": {
         "description": "Administrator username on all VMs"
@@ -294,7 +296,7 @@
       "properties": {
         "overprovision": "false",
         "upgradePolicy": {
-          "mode": "Automatic"
+          "mode": "Manual"
         },
         "virtualMachineProfile": {
           "storageProfile": {
@@ -354,7 +356,7 @@
                   "autoUpgradeMinorVersion": true,
                   "settings": {
                     "fileUris": [
-                      "https://raw.githubusercontent.com/nhsuk/rancher-azure/feature/ubuntu-image/CustomScripts/ConfigureRancherHost-Ubuntu.sh"
+                      "https://raw.githubusercontent.com/nhsuk/rancher-azure/feature/ubuntu-image/CustomScripts/ConfigureRancherHost.sh"
                     ],
                     "commandToExecute": "[concat('sh ', 'ConfigureRancherHost-Ubuntu.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherRegistrationToken'))]"
                   }
