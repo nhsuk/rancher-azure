@@ -33,6 +33,11 @@
       "type": "string",
       "minLength": 1
     },
+    "rancherHostLabels": {
+      "type": "string",
+      "defaultValue": "platform=azure&env=test",
+      "minLength": 1
+    },
     "adminUsername": {
       "type": "string",
       "defaultValue": "rancheradmin",
@@ -356,9 +361,9 @@
                   "autoUpgradeMinorVersion": true,
                   "settings": {
                     "fileUris": [
-                      "https://raw.githubusercontent.com/nhsuk/rancher-azure/feature/ubuntu-image/CustomScripts/ConfigureRancherHost.sh"
+                      "https://raw.githubusercontent.com/nhsuk/rancher-azure/master/CustomScripts/ConfigureRancherHost.sh"
                     ],
-                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost-Ubuntu.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherRegistrationToken'))]"
+                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherRegistrationToken'),' ',parameters('rancherHostLabels') )]"
                   }
                 }
               }
