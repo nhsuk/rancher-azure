@@ -5,16 +5,15 @@ export RANCHER_SERVER_URL=$1
 export RANCHER_TOKEN=$2
 export RANCHER_LABELS=$3
 
-export RANCHER_AGENT_DOCKER_IMAGE='rancher/agent:v1.2.0'
+export RANCHER_AGENT_DOCKER_IMAGE='rancher/agent:v1.2.1'
 
 # INSTALL DOCKER
-curl https://releases.rancher.com/install-docker/1.12.sh | sh
+curl https://releases.rancher.com/install-docker/1.13.sh | sh
 sleep 5
 
 # RUN RANCHER SERVER
 sudo docker run -d --privileged \
                 -e CATTLE_AGENT_IP=${HOST_IP} \
-                -e CATTLE_HOST_LABELS="${RANCHER_LABELS}" \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v /var/lib/rancher:/var/lib/rancher \
                 ${RANCHER_AGENT_DOCKER_IMAGE} \
