@@ -29,8 +29,25 @@
       "defaultValue": "https://rancher.nhschoices.net",
       "minLength": 1
     },
-    "rancherRegistrationToken": {
+    "rancherAccessToken": {
       "type": "string",
+      "metadata": {
+        "description": "Access Key from Rancher, needs to be able to access the Rancher environment you're requesting to join"
+      },
+      "minLength": 1
+    },
+    "rancherSecretToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Secret Key associated with the Rancher Access Key"
+      },
+      "minLength": 1
+    },
+    "rancherEnvironmentName": {
+      "type": "string",
+      "metadata": {
+        "description": "The Name of the Rancher environment you wish to join"
+      },
       "minLength": 1
     },
     "rancherHostLabels": {
@@ -363,7 +380,7 @@
                     "fileUris": [
                       "https://raw.githubusercontent.com/nhsuk/rancher-azure/master/CustomScripts/ConfigureRancherHost.sh"
                     ],
-                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherRegistrationToken'),' ',parameters('rancherHostLabels') )]"
+                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost.sh' , ' ', parameters('rancherServerUrl'), ' ', parameters('rancherEnvironmentName'), ' ', parameters('rancherAccessToken'), ' ', parameters('rancherSecretToken'), ' ', parameters('rancherHostLabels') )]"
                   }
                 }
               }
