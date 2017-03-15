@@ -7,6 +7,17 @@ export RANCHER_LABELS=$3
 
 export RANCHER_AGENT_DOCKER_IMAGE='rancher/agent:v1.2.1'
 
+# DISABLE TRANSPARENT HUGEPAGE FILEs
+# TODO: Make it persist across reboots
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
+# CONFIGURE DOCKER SETTINGS
+mkdir -p /etc/systemd/system/docker.service.d
+echo """[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd --storage-driver=overlay2
+""" > /etc/systemd/system/docker.service.d/custom.conf
+
 # INSTALL DOCKER
 curl https://releases.rancher.com/install-docker/1.13.sh | sh
 sleep 5
