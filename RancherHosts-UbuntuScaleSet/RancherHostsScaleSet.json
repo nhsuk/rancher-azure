@@ -38,6 +38,10 @@
       "defaultValue": "platform=azure",
       "minLength": 1
     },
+    "SplunkHECToken": {
+      "type": "string",
+      "minLength": 1
+    },
     "adminUsername": {
       "type": "string",
       "defaultValue": "rancheradmin",
@@ -333,7 +337,7 @@
                     "fileUris": [
                       "https://raw.githubusercontent.com/nhsuk/rancher-azure/master/CustomScripts/ConfigureRancherHost.sh"
                     ],
-                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherRegistrationToken'),' ',parameters('rancherHostLabels') )]"
+                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherRegistrationToken'),' ',parameters('rancherHostLabels'), ' ', parameters('SplunkHECToken') )]"
                   }
                 }
               }

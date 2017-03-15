@@ -3,10 +3,10 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmssName": {
-      "value": "c2sdev"
+      "value": "nhsukdev"
     },
     "instanceCount": {
-      "value": 2
+      "value": 3
     },
     "adminUsername": {
       "reference": {
@@ -25,7 +25,7 @@
       }
     },
     "vmSize": {
-      "value": "Standard_DS1_v2"
+      "value": "Standard_DS2_v2"
     },
     "rancherRegistrationToken": {
       "reference": {
@@ -35,8 +35,16 @@
         "secretName": "rancher-regtoken"
       }
     },
+    "SplunkHECToken": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/d29bb595-46d1-4c56-82c4-9f2e0062c2da/resourceGroups/c2s-common/providers/Microsoft.KeyVault/vaults/c2s-dev-vault"
+        },
+        "secretName": "splunk-hec-token"
+      }
+    },
     "rancherHostLabels": {
-      "value": "platform=azure\\&project=c2s\\&environment=dev"
+      "value": "platform=azure\\&environment=dev"
     }
   }
 }

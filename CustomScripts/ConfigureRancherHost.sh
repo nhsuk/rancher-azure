@@ -4,6 +4,7 @@ export HOST_IP=$(ip addr show eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*'
 export RANCHER_SERVER_URL=$1
 export RANCHER_TOKEN=$2
 export RANCHER_LABELS=$3
+export SPLUNK_TOKEN=$4
 
 export RANCHER_AGENT_DOCKER_IMAGE='rancher/agent:v1.2.1'
 
@@ -15,8 +16,9 @@ echo never > /sys/kernel/mm/transparent_hugepage/enabled
 mkdir -p /etc/systemd/system/docker.service.d
 echo """[Service]
 ExecStart=
-ExecStart=/usr/bin/dockerd --storage-driver=overlay2
+ExecStart=/usr/bin/dockerd --storage-driver=overlay2 --log-driver=splunk --log-opt splunk-token=${SPLUNK_TOKEN} --log-opt splunk-url=https://splunk-collector.cloudapp.net:8088 --log-opt splunk-verify-connection=false --log-opt splunk-insecureskipverify=true --log-opt tag=\"{{.ImageName}}/{{.ImageID}}/{{.Name}}/{{.FullID}}\"
 """ > /etc/systemd/system/docker.service.d/custom.conf
+
 
 # INSTALL DOCKER
 curl https://releases.rancher.com/install-docker/1.13.sh | sh
