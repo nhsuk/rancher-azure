@@ -35,7 +35,7 @@
     },
     "rancherHostLabels": {
       "type": "string",
-      "defaultValue": "platform=azure\\&env=test",
+      "defaultValue": "platform=azure",
       "minLength": 1
     },
     "adminUsername": {
@@ -55,15 +55,8 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "storageAccountType": "Premium_LRS",
     "namingInfix": "[toLower(parameters('vmssName'))]",
     "longNamingInfix": "[toLower(parameters('vmssName'))]",
-    "newStorageAccountSuffix": "sa",
-    "uniqueStringArray": [
-      "[concat(variables('namingInfix'), variables('newStorageAccountSuffix'), '0')]"
-    ],
-    "vhdContainerName": "[concat(variables('namingInfix'), 'vhd')]",
-    "osDiskName": "[concat(variables('namingInfix'), 'osdisk')]",
     "addressPrefix": "10.0.1.0/24",
     "subnetPrefix": "10.0.1.0/25",
     "virtualNetworkName": "[concat(variables('namingInfix'), '-vnet')]",
@@ -109,23 +102,6 @@
             }
           }
         ]
-      }
-    },
-
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('uniqueStringArray')[copyIndex()]]",
-      "location": "[variables('location')]",
-      "apiVersion": "2015-06-15",
-      "tags": {
-        "displayName": "StorageAccounts"
-      },
-      "copy": {
-        "name": "storageLoop",
-        "count": "[length(variables('uniqueStringArray'))]"
-      },
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
       }
     },
 
@@ -284,12 +260,11 @@
       "type": "Microsoft.Compute/virtualMachineScaleSets",
       "name": "[variables('namingInfix')]",
       "location": "[variables('location')]",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2016-04-30-preview",
       "tags": {
         "displayName": "VMScaleSet"
       },
       "dependsOn": [
-        "storageLoop",
         "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
         "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
       ],
@@ -306,11 +281,6 @@
         "virtualMachineProfile": {
           "storageProfile": {
             "osDisk": {
-              "vhdContainers": [
-                "[concat('https://', variables('uniqueStringArray')[0], '.blob.core.windows.net/', variables('vhdContainerName'))]"
-              ],
-              "name": "[variables('osDiskName')]",
-              "caching": "ReadOnly",
               "createOption": "FromImage"
             },
             "imageReference": "[variables('imageReference')]"
