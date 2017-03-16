@@ -16,7 +16,7 @@ echo never > /sys/kernel/mm/transparent_hugepage/enabled
 mkdir -p /etc/systemd/system/docker.service.d
 echo """[Service]
 ExecStart=
-ExecStart=/usr/bin/dockerd --storage-driver=overlay2 --log-driver=splunk --log-opt splunk-token=${SPLUNK_TOKEN} --log-opt splunk-url=https://splunk-collector.cloudapp.net:8088 --log-opt splunk-verify-connection=false --log-opt splunk-insecureskipverify=true --log-opt tag=\"{{.ImageName}}/{{.ImageID}}/{{.Name}}/{{.FullID}}\"
+ExecStart=/usr/bin/dockerd --storage-driver=overlay2
 """ > /etc/systemd/system/docker.service.d/custom.conf
 
 
