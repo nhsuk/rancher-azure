@@ -12,6 +12,10 @@ export RANCHER_AGENT_DOCKER_IMAGE='rancher/agent:v1.2.1'
 # TODO: Make it persist across reboots
 echo never > /sys/kernel/mm/transparent_hugepage/enabled
 
+# Set mmap count for elastic-serch
+sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count = 262144" > /etc/sysctl.d/99-mmap-count.conf
+
 # CONFIGURE DOCKER SETTINGS
 mkdir -p /etc/systemd/system/docker.service.d
 echo """[Service]
