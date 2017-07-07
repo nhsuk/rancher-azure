@@ -5,7 +5,7 @@
 
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_DS1_v2",
+      "defaultValue": "Standard_DS2_v2_promo",
       "minLength": 1
     },
     "vmssName": {
@@ -33,15 +33,6 @@
       "type": "string",
       "minLength": 1
     },
-    "rancherHostLabels": {
-      "type": "string",
-      "defaultValue": "platform=azure",
-      "minLength": 1
-    },
-    "SplunkHECToken": {
-      "type": "string",
-      "minLength": 1
-    },
     "adminUsername": {
       "type": "string",
       "defaultValue": "rancheradmin",
@@ -55,14 +46,25 @@
       "metadata": {
         "description": "Administrator password on all VMs"
       }
+    },
+    "vnetAddress": {
+      "type": "string",
+      "defaultValue": "10.73.0.0/18",
+      "metadata": {
+        "description": "Vnet address range"
+      }
+    },
+    "subnet": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet which resides in the vnet address range (Format: 10.73.3.0/24)"
+      }
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "namingInfix": "[toLower(parameters('vmssName'))]",
     "longNamingInfix": "[toLower(parameters('vmssName'))]",
-    "addressPrefix": "10.0.1.0/24",
-    "subnetPrefix": "10.0.1.0/25",
     "virtualNetworkName": "[concat(variables('namingInfix'), '-vnet')]",
     "publicIPAddressName": "[concat(variables('namingInfix'), '-ip')]",
     "subnetName": "[concat(variables('namingInfix'), 'subnet')]",
@@ -79,7 +81,7 @@
       "publisher": "Canonical",
       "offer": "UbuntuServer",
       "sku": "16.04-LTS",
-      "version": "16.04.201702020"
+      "version": "latest"
     },
     "imageReference": "[variables('osType')]"
   },
@@ -95,14 +97,14 @@
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-            "[variables('addressPrefix')]"
+            "[parameters('vnetAddress')]"
           ]
         },
         "subnets": [
           {
             "name": "[variables('subnetName')]",
             "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]"
+              "addressPrefix": "[parameters('subnet')]"
             }
           }
         ]
@@ -194,7 +196,7 @@
             }
           },
           {
-            "name": "TraefikAdmin",
+            "name": "LoadBalancerStats",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[variables('frontEndIPConfigID')]"
@@ -209,7 +211,7 @@
                 "id": "[variables('backEndIPConfigID')]"
               },
               "probe": {
-                "id": "[concat(variables('lbID'), '/probes/','TraefikAdmin')]"
+                "id": "[concat(variables('lbID'), '/probes/','LoadBalancerStats')]"
               }
             }
           }
@@ -234,7 +236,7 @@
             }
           },
           {
-            "name": "TraefikAdmin",
+            "name": "LoadBalancerStats",
             "properties": {
               "protocol": "Tcp",
               "port": 8000,
@@ -285,8 +287,22 @@
         "virtualMachineProfile": {
           "storageProfile": {
             "osDisk": {
-              "createOption": "FromImage"
+              "createOption": "FromImage",
+              "managedDisk": {
+                "storageAccountType": "Premium_LRS"
+              }
             },
+            "dataDisks": [
+              {
+                "lun": 1,
+                "createOption": "Empty",
+                "caching": "ReadOnly",
+                "diskSizeGB": 200,
+                "managedDisk": {
+                  "storageAccountType": "Premium_LRS"
+                }
+              }
+            ],
             "imageReference": "[variables('imageReference')]"
           },
           "osProfile": {
@@ -337,7 +353,7 @@
                     "fileUris": [
                       "https://raw.githubusercontent.com/nhsuk/rancher-azure/master/CustomScripts/ConfigureRancherHost.sh"
                     ],
-                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherRegistrationToken'),' ',parameters('rancherHostLabels'), ' ', parameters('SplunkHECToken') )]"
+                    "commandToExecute": "[concat('sh ', 'ConfigureRancherHost.sh' ,' ',parameters('rancherServerUrl'),' ',parameters('rancherRegistrationToken') )]"
                   }
                 }
               }
