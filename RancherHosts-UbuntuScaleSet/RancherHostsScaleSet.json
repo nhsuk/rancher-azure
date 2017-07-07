@@ -46,14 +46,25 @@
       "metadata": {
         "description": "Administrator password on all VMs"
       }
+    },
+    "vnetAddress": {
+      "type": "string",
+      "defaultValue": "10.73.0.0/18",
+      "metadata": {
+        "description": "Vnet address range"
+      }
+    },
+    "subnet": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet which resides in the vnet address range (Format: 10.73.3.0/24)"
+      }
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "namingInfix": "[toLower(parameters('vmssName'))]",
     "longNamingInfix": "[toLower(parameters('vmssName'))]",
-    "addressPrefix": "10.73.0.0/18",
-    "subnetPrefix": "10.73.3.0/24",
     "virtualNetworkName": "[concat(variables('namingInfix'), '-vnet')]",
     "publicIPAddressName": "[concat(variables('namingInfix'), '-ip')]",
     "subnetName": "[concat(variables('namingInfix'), 'subnet')]",
@@ -86,14 +97,14 @@
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-            "[variables('addressPrefix')]"
+            "[parameters('vnetAddress')]"
           ]
         },
         "subnets": [
           {
             "name": "[variables('subnetName')]",
             "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]"
+              "addressPrefix": "[parameters('subnet')]"
             }
           }
         ]

@@ -5,9 +5,6 @@ export RANCHER_SERVER_URL=$1
 export RANCHER_TOKEN=$2
 
 export RANCHER_AGENT_DOCKER_IMAGE='rancher/agent:v1.2.2'
-export SPLUNK_VERSION='6.6.2'
-export SPLUNK_BUILD='4b804538c686'
-
 
 # CONFIGURE DISK, IF DRIVE EXISTS, BUT PARTITION DOESN'T
 if [ -b /dev/sdc ] && [ ! -b /dev/sdc1 ]; then
@@ -39,13 +36,6 @@ echo """[Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd --storage-driver=overlay2
 """ > /etc/systemd/system/docker.service.d/custom.conf
-
-# INSTALL SPLUNk
-wget https://download.splunk.com/products/universalforwarder/releases/${SPLUNK_VERSION}/linux/splunkforwarder-${SPLUNK_VERSION}-${SPLUNK_BUILD}-linux-2.6-amd64.deb
-dpkg -i splunkforwarder-${SPLUNK_VERSION}-${SPLUNK_BUILD}-linux-2.6-amd64.deb
-
-/opt/splunkforwarder/bin/splunk enable boot-start
-/opt/splunkforwarder/bin/splunk start --accept-license --answer-yes
 
 # INSTALL DOCKER
 curl https://releases.rancher.com/install-docker/17.03.sh | sh
