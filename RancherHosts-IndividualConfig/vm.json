@@ -1,0 +1,274 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string"
+    },
+    "rancherEnvironment": {
+      "type": "string"
+    },
+    "storageType": {
+      "type": "string"
+    },
+    "vmSize": {
+      "type": "string"
+    },
+    "adminUser": {
+      "type": "string"
+    },
+    "adminPublicKey": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "diskSize": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "vnetName": "[concat('vnet_', parameters('vmName'))]",
+    "nsgName": "[concat('nsg_', parameters('vmName'))]",
+    "ipName": "[concat('ip_', parameters('vmName'))]",
+    "nicName": "[concat('nic_', parameters('vmName'))]",
+    "diskName": "[concat('os_', parameters('vmName'))]",
+    "subnetName": "[concat('subnet_', parameters('vmName'))]",
+    "publicKeyLocation": "[concat('/home/', parameters('adminUser'), '/.ssh/authorized_keys')]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[parameters('location')]",
+      "tags": {
+        "rancher_env": "[parameters('rancherEnvironment')]",
+        "rancher_host": "[parameters('vmName')]"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          },
+          {
+            "name": "RANCHER-4500",
+            "properties": {
+              "protocol": "Udp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "4500",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 110,
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          },
+          {
+            "name": "RANCHER-500",
+            "properties": {
+              "protocol": "Udp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "500",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 120,
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 130,
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          },
+          {
+            "name": "HTTPS",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 140,
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          },
+          {
+            "name": "TraefikStats",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "8000",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 150,
+              "direction": "Inbound",
+              "sourceAddressPrefixes": [],
+              "destinationAddressPrefixes": []
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('vnetName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('location')]",
+      "tags": {
+        "rancher_host": "[parameters('vmName')]",
+        "rancher_env": "[parameters('rancherEnvironment')]"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.17.0/28"
+          ]
+        },
+        "subnets": [{
+          "name": "[variables('subnetName')]",
+          "properties": {
+            "addressPrefix": "10.0.17.0/28"
+          }
+        }]
+      }
+    },
+
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('ipName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('location')]",
+      "tags": {
+        "rancher_host": "[parameters('vmName')]",
+        "rancher_env": "[parameters('rancherEnvironment')]"
+      },
+      "properties": {
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('vmName')]"
+        },
+        "publicIPAllocationMethod": "dynamic"
+      }
+    },
+
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('location')]",
+      "tags": {
+        "rancher_host": "[parameters('vmName')]",
+        "rancher_env": "[parameters('rancherEnvironment')]"
+      },
+      "properties": {
+        "ipConfigurations": [{
+          "name": "ipconfig",
+          "properties": {
+            "privateIPAllocationMethod": "Dynamic",
+            "publicIPAddress": {
+              "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('ipName'))]"
+            },
+            "subnet": {
+              "id": "[variables('subnetRef')]"
+            }
+          }
+        }],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        }
+      },
+      "dependsOn": [
+        "[variables('vnetName')]",
+        "[variables('ipName')]"
+      ]
+    },
+
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('vmName')]",
+      "apiVersion": "2017-03-30",
+      "location": "[parameters('location')]",
+      "tags": {
+        "rancher_host": "[parameters('vmName')]",
+        "rancher_env": "[parameters('rancherEnvironment')]"
+      },
+      "properties": {
+        "storageProfile": {
+          "osDisk": {
+            "managedDisk": {
+              "storageAccountType": "[parameters('storageType')]"
+            },
+            "name": "[variables('diskName')]",
+            "diskSizeGB": "[parameters('diskSize')]",
+            "createOption": "fromImage"
+          },
+          "imageReference": {
+            "offer": "UbuntuServer",
+            "version": "latest",
+            "sku": "16.04-LTS",
+            "publisher": "Canonical"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [{
+            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName') )]"
+          }]
+        },
+        "osProfile": {
+          "linuxConfiguration": {
+            "ssh": {
+              "publicKeys": [{
+                "path": "[variables('publicKeyLocation')]",
+                "keyData": "[parameters('adminPublicKey')]"
+              }]
+            },
+            "disablePasswordAuthentication": true
+          },
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUser')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        }
+      },
+      "dependsOn": [
+        "[variables('nicName')]"
+      ]
+    }
+  ],
+  "outputs": {}
+}
