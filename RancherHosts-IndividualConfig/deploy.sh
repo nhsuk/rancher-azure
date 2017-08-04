@@ -153,7 +153,10 @@ az network traffic-manager endpoint create \
   --type azureEndpoints
 
 # CLEAR SSH KNOWN HOSTS, AND DISABLE STRICT HOST KEY CHECKING
-rm ~/.ssh/known_hosts
+if [ -f "~/.ssh/known_hosts" ]; then
+  rm ~/.ssh/known_hosts
+fi
+mkdir -p ~/.ssh/
 echo -e "Host $FQDN\n  StrictHostKeyChecking no" >> ~/.ssh/config
 
 # LOG ONTO HOST, THEN RUN SETUP
