@@ -148,7 +148,7 @@ echo "Adding to $RANCHER_ENV traffic manager"
 az network traffic-manager endpoint create \
   --name "$RANCHER_HOST" \
   --profile-name "$RANCHER_ENV" \
-  --resource-group "$RSG" \
+  --resource-group "$TRAFFIC_MANAGER_RSG" \
   --target-resource-id "$PUBLIC_IP_ID" \
   --type azureEndpoints
 
