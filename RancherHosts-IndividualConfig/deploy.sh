@@ -56,7 +56,7 @@ while getopts ":hn:e:l:s:t:u:k:d:" opt; do
    esac
 done
 
-
+TRAFFIC_MANAGER_RSG="nhsuk-common"
 INITIAL_LOCATION="uksouth"
 
 if [ -z "$VM_SIZE" ]; then
@@ -96,7 +96,7 @@ if [ -z "$ADMIN_USER" ]; then
 fi
 
 
-RSG="$RANCHER_ENV"
+RSG="$RANCHER_HOST"
 RANCHER_LABELS="provider=azure&location=$LOCATION"
 
 SSHKEY_TEMP="$(mktemp -u)"
@@ -111,11 +111,11 @@ az group create \
   --tags rancher_env="$RANCHER_ENV"
 
 # CHECK TM EXISTS, IF NOT, CREATE
-az network traffic-manager profile show -n "$RANCHER_ENV" -g "$RSG" | grep name
+az network traffic-manager profile show -n "$RANCHER_ENV" -g "$TRAFFIC_MANAGER_RSG" | grep name
 if [ $? -ne 0 ]; then
   echo "Creating Traffic Manager"
   az network traffic-manager profile create \
-    --resource-group "$RSG" \
+    --resource-group "$TRAFFIC_MANAGER_RSG" \
     --name "$RANCHER_ENV" \
     --routing-method performance \
     --unique-dns-name "$RANCHER_ENV" \
